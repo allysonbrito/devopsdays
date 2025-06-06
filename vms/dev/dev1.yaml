@@ -35,6 +35,9 @@ spec:
               hostname: dev1
               ssh_pwauth: True
               users:
-                - name: cloud-user
+                - name: techlead
                   ssh-authorized-keys:
                   - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDRi8B4JJh5A81arjChKWm4VhyKmVky8rqN/0iiJvQS02jujg7DdlyHcSbadEoU+hm9euf14tF0XIBaj58JzURvdK8cngfpwP+ENxp9IUBJNuFAGD3OdXH3XZIrY/YM6fJ/3TNPIJuZryt9CPmtnyDYGIkotSJM8evdS+RfCZG3218DnLdJRKCbByrr1ULNzMLvVXFA6d+RiyClnrDV88690d2OZnLt/S3baiMuReFG0cFUlcGXFNawFrkAGMoLIfIW7AYjLIQOheKInz/nox2ErqOwMCZ4leemSi3bjTVzEItZKrGezoSRevyTEn9zmkxECIYYcfEzBdcUHb767OWj allyson.brito@MacBook-Pro-de-Allyson.local
+                  - passwd: $6$KbD2ut1.QXbMAn36$ZpRHF7YfDlThNPzTiHMTM.7PUDhWg7xhnHSpbR3CnnyPfGDYYwvGmOIGMKkhHb6GpEx4u6PqtSPv3PNWkzFKR0
+                  - lock_passwd: false
+                  - groups: wheel
