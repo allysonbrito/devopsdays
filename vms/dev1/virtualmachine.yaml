@@ -1,14 +1,14 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: dev1
+  name: rhel9-vm
   namespace: gitops
 spec:
   running: true
   template:
     metadata:
       labels:
-        kubevirt.io/domain: dev1
+        kubevirt.io/domain: rhel9-vm
     spec:
       domain:
         cpu:
@@ -27,15 +27,14 @@ spec:
       volumes:
         - name: containerdisk
           containerDisk:
-            image: quay.io/rockylinux/rockylinux:9
+            image: quay.io/kubevirt/centos-stream9-container-disk:latest
         - name: cloudinitdisk
           cloudInitNoCloud:
             userData: |
               #cloud-config
-              hostname: dev1
+              hostname: rhel9-vm
               ssh_pwauth: True
               users:
                 - name: cloud-user
                   ssh-authorized-keys:
                   - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDRi8B4JJh5A81arjChKWm4VhyKmVky8rqN/0iiJvQS02jujg7DdlyHcSbadEoU+hm9euf14tF0XIBaj58JzURvdK8cngfpwP+ENxp9IUBJNuFAGD3OdXH3XZIrY/YM6fJ/3TNPIJuZryt9CPmtnyDYGIkotSJM8evdS+RfCZG3218DnLdJRKCbByrr1ULNzMLvVXFA6d+RiyClnrDV88690d2OZnLt/S3baiMuReFG0cFUlcGXFNawFrkAGMoLIfIW7AYjLIQOheKInz/nox2ErqOwMCZ4leemSi3bjTVzEItZKrGezoSRevyTEn9zmkxECIYYcfEzBdcUHb767OWj allyson.brito@MacBook-Pro-de-Allyson.local
-
