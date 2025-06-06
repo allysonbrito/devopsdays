@@ -1,0 +1,89 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-app
+  labels:
+    app: vm-application
+    managed-by: argocd
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-app
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        memory:
+          guest: 4Gi
+        devices:
+          disks:
+          - name: rootdisk
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            masquerade: {}
+        resources:
+          requests:
+            memory: 4Gi
+            cpu: 2
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: rootdisk
+        dataVolume:
+          name: vm-app-rootdisk
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            user: admin
+            password: admin123
+            chpasswd: { expire: False }
+            ssh_pwauth: True
+            package_update: true
+            packages:
+              - nginx
+            runcmd:
+              - systemctl enable nginx
+              - systemctl start nginx
+              - echo "VM Provisioned via GitOps - Base Version" > /var/www/html/index.html
+              - firewall-cmd --permanent --add-service=http
+              - firewall-cmd --reload
+---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: vm-app-rootdisk
+spec:
+  pvc:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
+  source:
+    registry:
+      url: docker://registry.redhat.io/rhel8/rhel-guest-image:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vm-app-service
+spec:
+  selector:
+    kubevirt.io/vm: vm-app
+  ports:
+  - port: 80
+    targetPort: 80
+    name: http
+  - port: 22
+    targetPort: 22
+    name: ssh
+  type: ClusterIP

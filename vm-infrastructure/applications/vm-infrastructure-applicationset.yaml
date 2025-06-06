@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: vm-infrastructure-set
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - env: dev
+        namespace: vm-dev
+        vmCpu: 2
+        vmMemory: 4Gi
+        storageSize: 10Gi
+      - env: staging
+        namespace: vm-staging
+        vmCpu: 3
+        vmMemory: 6Gi
+        storageSize: 20Gi
+      - env: prod
+        namespace: vm-prod
+        vmCpu: 4
+        vmMemory: 8Gi
+        storageSize: 50Gi
+  template:
+    metadata:
+      name: 'vm-infrastructure-{{env}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/allysonbrito/devopsdays.git
+        targetRevision: main
+        path: 'vm-infrastructure/environments/{{env}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - PrunePropagationPolicy=foreground
+      ignoreDifferences:
+      - group: kubevirt.io
+        kind: VirtualMachine
+        jsonPointers:
+        - /status

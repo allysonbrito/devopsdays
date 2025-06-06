@@ -1,0 +1,9 @@
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: vm-app-rootdisk
+spec:
+  pvc:
+    resources:
+      requests:
+        storage: 20Gi

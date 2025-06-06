@@ -7,24 +7,31 @@ spec:
     spec:
       domain:
         cpu:
-          cores: 2
+          cores: 4
         memory:
-          guest: 4Gi
+          guest: 8Gi
+        resources:
+          requests:
+            memory: 8Gi
+            cpu: 4
       volumes:
       - name: cloudinitdisk
         cloudInitNoCloud:
           userData: |
             #cloud-config
             user: admin
-            password: admin123
+            password: prod123
             chpasswd: { expire: False }
             ssh_pwauth: True
             package_update: true
             packages:
               - nginx
+              - htop
+              - curl
             runcmd:
               - systemctl enable nginx
               - systemctl start nginx
-              - echo "DEV Environment - GitOps Managed VM" > /var/www/html/index.html
+              - echo "PRODUCTION Environment - GitOps Managed VM - Version: 3.0" > /var/www/html/index.html
+              - echo "Connected to VM Infrastructure" >> /var/www/html/index.html
               - firewall-cmd --permanent --add-service=http
               - firewall-cmd --reload

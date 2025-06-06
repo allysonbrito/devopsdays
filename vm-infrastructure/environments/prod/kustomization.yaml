@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: vm-dev
+namespace: vm-prod
 
 resources:
 - ../../base
@@ -11,11 +11,11 @@ patches:
 - path: datavolume-config.yaml
 - path: container-config.yaml
 
-namePrefix: dev-
+namePrefix: prod-
 
 labels:
 - pairs:
-    environment: dev
+    environment: prod
     version: v1.0.0
 
 images:
