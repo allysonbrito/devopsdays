@@ -1,0 +1,17 @@
+# environments/dev/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: vm-dev
+
+resources:
+- ../../base
+
+patchesStrategicMerge:
+- vm-config.yaml
+
+namePrefix: dev-
+
+commonLabels:
+  environment: dev
+  version: v1.0.0

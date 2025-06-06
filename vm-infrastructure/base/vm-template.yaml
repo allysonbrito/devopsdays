@@ -1,0 +1,75 @@
+# base/vm-template.yaml
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-app
+  namespace: vm-workloads
+  labels:
+    app: vm-application
+    managed-by: argocd
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-app
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        memory:
+          guest: 4Gi
+        devices:
+          disks:
+          - name: rootdisk
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            masquerade: {}
+        resources:
+          requests:
+            memory: 4Gi
+            cpu: 2
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: rootdisk
+        dataVolume:
+          name: vm-app-rootdisk
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            user: admin
+            password: admin123
+            chpasswd: { expire: False }
+            ssh_pwauth: True
+            package_update: true
+            packages:
+              - nginx
+            runcmd:
+              - systemctl enable nginx
+              - systemctl start nginx
+              - echo "VM Provisioned via GitOps - Version: 1.0" > /var/www/html/index.html
+---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: vm-app-rootdisk
+  namespace: vm-workloads
+spec:
+  pvc:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
+    storageClassName: ocs-storagecluster-ceph-rbd
+  source:
+    registry:
+      url: docker://registry.redhat.io/rhel8/rhel-guest-image:latest

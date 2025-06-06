@@ -1,0 +1,43 @@
+# environments/dev/vm-config.yaml
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-app
+spec:
+  template:
+    spec:
+      domain:
+        cpu:
+          cores: 1
+        memory:
+          guest: 2Gi
+        resources:
+          requests:
+            memory: 2Gi
+            cpu: 1
+      volumes:
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            user: admin
+            password: admin123
+            chpasswd: { expire: False }
+            ssh_pwauth: True
+            package_update: true
+            packages:
+              - nginx
+            runcmd:
+              - systemctl enable nginx
+              - systemctl start nginx
+              - echo "DEV Environment - GitOps Managed VM - Version: 1.0" > /var/www/html/index.html
+---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: vm-app-rootdisk
+spec:
+  pvc:
+    resources:
+      requests:
+        storage: 10Gi
