@@ -84,17 +84,9 @@ spec:
   selector:
     kubevirt.io/domain: dev1
   ports:
-    - name: ssh
-      port: 22
-      targetPort: 22
-      protocol: TCP
     - name: http
       port: 80
       targetPort: 80
-      protocol: TCP
-    - name: https
-      port: 443
-      targetPort: 443
       protocol: TCP
   type: ClusterIP
 
@@ -112,15 +104,5 @@ spec:
       port: 22
       targetPort: 22
       nodePort: 30022
-      protocol: TCP
-    - name: http
-      port: 80
-      targetPort: 80
-      nodePort: 30080
-      protocol: TCP
-    - name: https
-      port: 443
-      targetPort: 443
-      nodePort: 30443
       protocol: TCP
   type: NodePort
