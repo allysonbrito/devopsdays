@@ -21,9 +21,15 @@ spec:
             - disk:
                 bus: virtio
               name: cloudinitdisk
+          interfaces:
+            - name: default
+              masquerade: {}
         resources:
           requests:
             memory: 8Gi
+      networks:
+        - name: default
+          pod: {}
       volumes:
         - name: containerdisk
           containerDisk:
@@ -38,6 +44,83 @@ spec:
                 - name: techlead
                   ssh-authorized-keys:
                   - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDRi8B4JJh5A81arjChKWm4VhyKmVky8rqN/0iiJvQS02jujg7DdlyHcSbadEoU+hm9euf14tF0XIBaj58JzURvdK8cngfpwP+ENxp9IUBJNuFAGD3OdXH3XZIrY/YM6fJ/3TNPIJuZryt9CPmtnyDYGIkotSJM8evdS+RfCZG3218DnLdJRKCbByrr1ULNzMLvVXFA6d+RiyClnrDV88690d2OZnLt/S3baiMuReFG0cFUlcGXFNawFrkAGMoLIfIW7AYjLIQOheKInz/nox2ErqOwMCZ4leemSi3bjTVzEItZKrGezoSRevyTEn9zmkxECIYYcfEzBdcUHb767OWj allyson.brito@MacBook-Pro-de-Allyson.local
-                  - passwd: $6$KbD2ut1.QXbMAn36$ZpRHF7YfDlThNPzTiHMTM.7PUDhWg7xhnHSpbR3CnnyPfGDYYwvGmOIGMKkhHb6GpEx4u6PqtSPv3PNWkzFKR0
-                  - lock_passwd: false
-                  - groups: wheel
+                  passwd: $6$KbD2ut1.QXbMAn36$ZpRHF7YfDlThNPzTiHMTM.7PUDhWg7xhnHSpbR3CnnyPfGDYYwvGmOIGMKkhHb6GpEx4u6PqtSPv3PNWkzFKR0
+              packages:
+                - httpd
+                - firewalld
+              runcmd:
+                - systemctl enable httpd
+                - systemctl start httpd
+                - systemctl enable firewalld
+                - systemctl start firewalld
+                - firewall-cmd --permanent --add-service=http
+                - firewall-cmd --permanent --add-service=https
+                - firewall-cmd --permanent --add-service=ssh
+                - firewall-cmd --permanent --add-icmp-block-inversion
+                - firewall-cmd --permanent --add-icmp-block=echo-request
+                - firewall-cmd --permanent --remove-icmp-block=echo-request
+                - firewall-cmd --reload
+                - echo "<h1>Servidor HTTP Dev1</h1><p>Servidor funcionando corretamente!</p>" > /var/www/html/index.html
+                - chown apache:apache /var/www/html/index.html
+                - chmod 644 /var/www/html/index.html
+              write_files:
+                - path: /etc/httpd/conf.d/welcome.conf
+                  content: |
+                    <VirtualHost *:80>
+                        DocumentRoot /var/www/html
+                        ServerName dev1
+                        ErrorLog /var/log/httpd/dev1_error.log
+                        CustomLog /var/log/httpd/dev1_access.log combined
+                    </VirtualHost>
+                  permissions: '0644'
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev1-http-service
+  namespace: gitops
+spec:
+  selector:
+    kubevirt.io/domain: dev1
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: 22
+      protocol: TCP
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev1-nodeport-service
+  namespace: gitops
+spec:
+  selector:
+    kubevirt.io/domain: dev1
+  ports:
+    - name: ssh
+      port: 22
+      targetPort: 22
+      nodePort: 30022
+      protocol: TCP
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 30080
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      nodePort: 30443
+      protocol: TCP
+  type: NodePort
