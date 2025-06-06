@@ -1,0 +1,74 @@
+apiVersion: v1
+items:
+- apiVersion: k8s.cni.cncf.io/v1
+  kind: NetworkAttachmentDefinition
+  metadata:
+    annotations:
+      k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br1
+    creationTimestamp: "2025-01-31T12:39:15Z"
+    generation: 1
+    name: vlan10-bridge
+    namespace: vms
+    resourceVersion: "12814035"
+    uid: a6bf8506-f9d6-40a4-b795-71fa132f31f9
+  spec:
+    config: |-
+      {
+          "cniVersion": "0.3.1",
+          "name": "vlan10-bridge",
+          "type": "bridge",
+          "bridge": "br1",
+          "ipam": {},
+          "macspoofchk": true,
+          "preserveDefaultVlan": false,
+          "vlan": 10
+      }
+- apiVersion: k8s.cni.cncf.io/v1
+  kind: NetworkAttachmentDefinition
+  metadata:
+    annotations:
+      k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br1
+    creationTimestamp: "2025-02-03T18:03:32Z"
+    generation: 1
+    name: vlan19-bridge
+    namespace: vms
+    resourceVersion: "16380801"
+    uid: d08c065c-459e-4350-9cd4-d90381824362
+  spec:
+    config: |-
+      {
+          "cniVersion": "0.3.1",
+          "name": "vlan19-bridge",
+          "type": "bridge",
+          "bridge": "br1",
+          "ipam": {},
+          "macspoofchk": true,
+          "preserveDefaultVlan": false,
+          "vlan": 19
+      }
+- apiVersion: k8s.cni.cncf.io/v1
+  kind: NetworkAttachmentDefinition
+  metadata:
+    annotations:
+      k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br1
+    creationTimestamp: "2025-04-09T18:32:54Z"
+    generation: 1
+    name: vlan20
+    namespace: vms
+    resourceVersion: "121525291"
+    uid: 71bad019-1fb0-4892-bb0d-2f150d05cfa5
+  spec:
+    config: |-
+      {
+          "cniVersion": "0.3.1",
+          "name": "vlan20",
+          "type": "bridge",
+          "bridge": "br1",
+          "ipam": {},
+          "macspoofchk": true,
+          "preserveDefaultVlan": false,
+          "vlan": 20
+      }
+kind: List
+metadata:
+  resourceVersion: ""

@@ -22,14 +22,17 @@ spec:
                 bus: virtio
               name: cloudinitdisk
           interfaces:
-            - name: default
-              masquerade: {}
+            # nova interface via Multus VLAN 19
+            - name: vlan19-net
+              bridge: {}
         resources:
           requests:
             memory: 8Gi
       networks:
-        - name: default
-          pod: {}
+        # referência ao NAD vlan19-bridge no namespace gitops
+        - name: vlan19-net
+          multus:
+            networkName: gitops/vlan19-bridge
       volumes:
         - name: containerdisk
           containerDisk:
@@ -73,7 +76,6 @@ spec:
                         CustomLog /var/log/httpd/dev1_access.log combined
                     </VirtualHost>
                   permissions: '0644'
-
 ---
 apiVersion: v1
 kind: Service

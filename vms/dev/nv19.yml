@@ -1,0 +1,22 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br1
+  creationTimestamp: "2025-02-03T18:03:32Z"
+  generation: 1
+  name: vlan19-bridge
+  namespace: gitops
+  resourceVersion: "16380801"
+spec:
+  config: |-
+    {
+        "cniVersion": "0.3.1",
+        "name": "vlan19-bridge",
+        "type": "bridge",
+        "bridge": "br1",
+        "ipam": {},
+        "macspoofchk": true,
+        "preserveDefaultVlan": false,
+        "vlan": 19
+    }
