@@ -27,7 +27,7 @@ spec:
       volumes:
         - name: containerdisk
           containerDisk:
-            image: default-route-openshift-image-registry.apps.ocp.techlead.local/openshift-virtualization-os-images/rhel9-guest:latest
+            image: image-registry.openshift-image-registry.svc:5000/openshift-virtualization-os-images/rhel9-guest:latest
         - name: cloudinitdisk
           cloudInitNoCloud:
             userData: |
