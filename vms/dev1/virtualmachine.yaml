@@ -1,14 +1,14 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: dev1
+  name: rhel9-vm
   namespace: gitops
 spec:
   running: true
   template:
     metadata:
       labels:
-        kubevirt.io/domain: dev1
+        kubevirt.io/domain: rhel9-vm
     spec:
       domain:
         cpu:
@@ -27,12 +27,12 @@ spec:
       volumes:
         - name: containerdisk
           containerDisk:
-            image: quay.io/kubevirt/fedora-cloud-container-disk:latest
+            image: default-route-openshift-image-registry.apps.ocp.techlead.local/openshift-virtualization-os-images/rhel9-guest:latest
         - name: cloudinitdisk
           cloudInitNoCloud:
             userData: |
               #cloud-config
-              hostname: dev1
+              hostname: rhel9-vm
               ssh_pwauth: True
               users:
                 - name: cloud-user
