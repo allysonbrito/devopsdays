@@ -31,6 +31,10 @@
     {
       "ip": "jsonplaceholder.typicode.com",
       "name": "JSONPlaceholder"
+    },
+    {
+      "ip": "10.129.1.129",
+      "name:" "dev1"
     }
   ]
 }
