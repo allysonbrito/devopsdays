@@ -27,7 +27,7 @@ spec:
       volumes:
         - name: containerdisk
           containerDisk:
-            image: quay.io/kubevirt/centos-stream9-container-disk:latest
+            image: quay.io/kubevirt/fedora-cloud-container-disk:latest
         - name: cloudinitdisk
           cloudInitNoCloud:
             userData: |
