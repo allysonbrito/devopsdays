@@ -12,7 +12,7 @@ spec:
     spec:
       domain:
         cpu:
-          cores: 2
+          cores: 4
         devices:
           disks:
             - disk:
