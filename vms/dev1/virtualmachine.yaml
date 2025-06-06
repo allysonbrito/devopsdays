@@ -1,14 +1,14 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: rhel9-vm
+  name: dev1
   namespace: gitops
 spec:
   running: true
   template:
     metadata:
       labels:
-        kubevirt.io/domain: rhel9-vm
+        kubevirt.io/domain: dev1
     spec:
       domain:
         cpu:
@@ -32,7 +32,7 @@ spec:
           cloudInitNoCloud:
             userData: |
               #cloud-config
-              hostname: rhel9-vm
+              hostname: dev1
               ssh_pwauth: True
               users:
                 - name: cloud-user
