@@ -9,9 +9,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/seu-usuario/vm-infrastructure.git
+    repoURL: https://github.com/allysonbrito/devopsdays
     targetRevision: main
-    path: environments/dev
+    path: vm-infrastructure/environments/dev
   destination:
     server: https://kubernetes.default.svc
     namespace: vm-dev
