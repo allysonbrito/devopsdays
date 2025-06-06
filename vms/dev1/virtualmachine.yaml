@@ -10,8 +10,6 @@ spec:
       labels:
         kubevirt.io/domain: rhel9-vm
     spec:
-      imagePullSecrets:
-        - name: redhat-registry-secret
       domain:
         cpu:
           cores: 2
@@ -29,7 +27,7 @@ spec:
       volumes:
         - name: containerdisk
           containerDisk:
-            image: registry.redhat.io/rhel9/rhel-guest-image:latest
+            image: quay.io/rockylinux/rockylinux:9
         - name: cloudinitdisk
           cloudInitNoCloud:
             userData: |
@@ -39,5 +37,5 @@ spec:
               users:
                 - name: cloud-user
                   ssh-authorized-keys:
-                    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDRi8B4JJh5A81arjChKWm4VhyKmVky8rqN/0iiJvQS02jujg7DdlyHcSbadEoU+hm9euf14tF0XIBaj58JzURvdK8cngfpwP+ENxp9IUBJNuFAGD3OdXH3XZIrY/YM6fJ/3TNPIJuZryt9CPmtnyDYGIkotSJM8evdS+RfCZG3218DnLdJRKCbByrr1ULNzMLvVXFA6d+RiyClnrDV88690d2OZnLt/S3baiMuReFG0cFUlcGXFNawFrkAGMoLIfIW7AYjLIQOheKInz/nox2ErqOwMCZ4leemSi3bjTVzEItZKrGezoSRevyTEn9zmkxECIYYcfEzBdcUHb767OWj allyson.brito@MacBook-Pro-de-Allyson.local
+                  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDRi8B4JJh5A81arjChKWm4VhyKmVky8rqN/0iiJvQS02jujg7DdlyHcSbadEoU+hm9euf14tF0XIBaj58JzURvdK8cngfpwP+ENxp9IUBJNuFAGD3OdXH3XZIrY/YM6fJ/3TNPIJuZryt9CPmtnyDYGIkotSJM8evdS+RfCZG3218DnLdJRKCbByrr1ULNzMLvVXFA6d+RiyClnrDV88690d2OZnLt/S3baiMuReFG0cFUlcGXFNawFrkAGMoLIfIW7AYjLIQOheKInz/nox2ErqOwMCZ4leemSi3bjTVzEItZKrGezoSRevyTEn9zmkxECIYYcfEzBdcUHb767OWj allyson.brito@MacBook-Pro-de-Allyson.local
 
