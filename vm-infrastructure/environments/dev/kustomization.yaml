@@ -1,25 +1,23 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: gitops
-
+namespace: gitops         # obrigatório minúsculo
 resources:
-- ../../base
+  - ../../base
 
-patches:
-- path: vm-config.yaml
-- path: datavolume-config.yaml
-- path: container-config.yaml
-
-namePrefix: dev-
+patchesStrategicMerge:
+  - vm-config.yaml
+  - datavolume-config.yaml
+  - container-config.yaml
 
 labels:
-- pairs:
-    environment: dev
-    version: v1.0.0
+  - pairs:
+      environment: dev
+      version: v1.0.0
 
 images:
-- name: quay.io/techlead_allyson/hybrid-web-frontend
-  newTag: latest
-- name: quay.io/techlead_allyson/hybrid-api-backend
-  newTag: latest
+  - name: quay.io/techlead_allyson/hybrid-web-frontend
+    newTag: latest
+  - name: quay.io/techlead_allyson/hybrid-api-backend
+    newTag: latest
+
