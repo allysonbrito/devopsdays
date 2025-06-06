@@ -23,7 +23,7 @@ spec:
               name: cloudinitdisk
         resources:
           requests:
-            memory: 4Gi
+            memory: 8Gi
       volumes:
         - name: containerdisk
           containerDisk:
