@@ -1,0 +1,16 @@
+{
+  "targets": [
+    {
+      "ip": "dev1-http-service-gitops.apps.ocp.techlead.local",
+      "name": "dev1 - apache"
+    },
+    {
+      "ip": "httpbin.org",
+      "name": "HTTPBin API"
+    },
+    {
+      "ip": "jsonplaceholder.typicode.com",
+      "name": "JSONPlaceholder"
+    }
+  ]
+}
