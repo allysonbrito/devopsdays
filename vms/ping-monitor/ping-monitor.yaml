@@ -26,7 +26,7 @@ spec:
           echo "🔄 Clonando repositório..."
           git clone https://github.com/allysonbrito/devopsdays.git /tmp/repo
           echo "📁 Copiando arquivos da aplicação..."
-          cp -r /tmp/repo/ping-monitor/* /app/
+          cp -r /tmp/repo/vms/ping-monitor/* /app/
           ls -la /app/
           echo "✅ Arquivos copiados com sucesso"
         volumeMounts:
