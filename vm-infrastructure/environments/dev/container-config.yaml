@@ -19,4 +19,4 @@ spec:
         - name: ENVIRONMENT
           value: "dev"
         - name: NAMESPACE
-          value: "vm-dev"
+          value: "gitops"
