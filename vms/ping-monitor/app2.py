@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Monitor de Conectividade - DevOpsDays
+Monitor de Conectividade - DevOpsDays (Versão Corrigida)
 Aplicação Flask que monitora conectividade HTTP de múltiplos targets
 """
 
@@ -11,6 +11,10 @@ from flask import Flask, jsonify, render_template_string
 from threading import Thread
 import requests
 import urllib3
+from requests.exceptions import (
+    ConnectionError, Timeout, TooManyRedirects, 
+    RequestException, HTTPError
+)
 
 # Desabilita warnings SSL para requests HTTPS
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -19,7 +23,7 @@ app = Flask(__name__)
 
 # Carrega lista de targets do arquivo de configuração
 try:
-    with open('/app/config/ips2.json', 'r') as f:
+    with open('/app/config/ips.json', 'r') as f:
         config = json.load(f)
     targets = config['targets']
     print(f"Carregados {len(targets)} targets para monitoramento")
@@ -33,54 +37,93 @@ status = {}
 
 def ping_target(ip):
     """
-    Verifica conectividade usando múltiplas estratégias:
-    1. HTTP (porta 80)
-    2. HTTPS (porta 443) 
-    3. Conexão TCP simples (porta 80)
+    Verifica conectividade HTTP/HTTPS de forma mais rigorosa
+    Retorna tuple: (is_online, status_detail, response_time)
     """
+    start_time = time.time()
+    
+    # 1. Primeiro tenta HTTP (mais comum para APIs/sites)
     try:
-        # Tenta HTTP primeiro
-        response = requests.get(f"http://{ip}", timeout=5, allow_redirects=True)
-        if response.status_code < 500:  # Qualquer coisa melhor que erro do servidor
-            return True
-    except:
+        response = requests.get(
+            f"http://{ip}", 
+            timeout=3,  # Timeout mais rigoroso
+            allow_redirects=True,
+            headers={'User-Agent': 'DevOpsDays-Monitor/1.0'}
+        )
+        response_time = round((time.time() - start_time) * 1000, 2)
+        
+        # Considera online apenas se realmente funcional
+        if 200 <= response.status_code < 400:
+            return True, f"HTTP OK ({response.status_code})", response_time
+        elif 400 <= response.status_code < 500:
+            return False, f"HTTP Client Error ({response.status_code})", response_time
+        else:
+            return False, f"HTTP Server Error ({response.status_code})", response_time
+            
+    except ConnectionError:
+        # Servidor realmente inacessível - continua para HTTPS
+        pass
+    except Timeout:
+        return False, "HTTP Timeout", round((time.time() - start_time) * 1000, 2)
+    except (RequestException, Exception) as e:
+        # Log específico seria útil em produção
         pass
     
+    # 2. Se HTTP falhou, tenta HTTPS
+    start_time = time.time()
     try:
-        # Tenta HTTPS
-        response = requests.get(f"https://{ip}", timeout=5, verify=False, allow_redirects=True)
-        if response.status_code < 500:
-            return True
-    except:
+        response = requests.get(
+            f"https://{ip}", 
+            timeout=3,
+            verify=False,  # Ignora SSL inválido apenas para teste de conectividade
+            allow_redirects=True,
+            headers={'User-Agent': 'DevOpsDays-Monitor/1.0'}
+        )
+        response_time = round((time.time() - start_time) * 1000, 2)
+        
+        if 200 <= response.status_code < 400:
+            return True, f"HTTPS OK ({response.status_code})", response_time
+        elif 400 <= response.status_code < 500:
+            return False, f"HTTPS Client Error ({response.status_code})", response_time
+        else:
+            return False, f"HTTPS Server Error ({response.status_code})", response_time
+            
+    except ConnectionError:
+        # Servidor inacessível via HTTPS também
+        pass
+    except Timeout:
+        return False, "HTTPS Timeout", round((time.time() - start_time) * 1000, 2)
+    except (RequestException, Exception):
         pass
     
-    try:
-        # Último recurso: conexão TCP simples
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(3)
-        result = sock.connect_ex((ip, 80))
-        sock.close()
-        return result == 0
-    except:
-        pass
+    # 3. Como último recurso, testa conectividade TCP básica
+    # Apenas para serviços que podem não responder HTTP mas estão "up"
+    start_time = time.time()
+    for port in [80, 443]:
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(2)  # Timeout ainda mais baixo para TCP
+            result = sock.connect_ex((ip, port))
+            sock.close()
+            
+            if result == 0:
+                response_time = round((time.time() - start_time) * 1000, 2)
+                return True, f"TCP Port {port} Open (No HTTP)", response_time
+                
+        except socket.error:
+            pass
     
-    # Se tudo falhar, tenta porta 443
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(3)
-        result = sock.connect_ex((ip, 443))
-        sock.close()
-        return result == 0
-    except:
-        return False
+    # Se chegou até aqui, o servidor está realmente offline
+    total_time = round((time.time() - start_time) * 1000, 2)
+    return False, "Connection Failed", total_time
 
 
 def monitor_loop():
     """
-    Loop principal de monitoramento que roda em background
+    Loop principal de monitoramento melhorado que roda em background
     Verifica todos os targets a cada 10 segundos
     """
-    print("🔍 Iniciando loop de monitoramento...")
+    print("🔍 Iniciando loop de monitoramento melhorado...")
     
     while True:
         print(f"🔄 Verificando {len(targets)} targets...")
@@ -89,23 +132,22 @@ def monitor_loop():
             ip = target['ip']
             name = target['name']
             
-            # Testa conectividade
-            start_time = time.time()
-            is_online = ping_target(ip)
-            response_time = round((time.time() - start_time) * 1000, 2)  # em ms
+            # Usa a função melhorada que retorna mais detalhes
+            is_online, status_detail, response_time = ping_target(ip)
             
-            # Atualiza status
+            # Atualiza status com informações detalhadas
             status[ip] = {
                 'name': name,
                 'status': 'online' if is_online else 'offline',
+                'status_detail': status_detail,
                 'last_check': time.strftime('%Y-%m-%d %H:%M:%S'),
                 'response_time': response_time if is_online else None
             }
             
-            # Log do resultado
+            # Log mais detalhado do resultado
             status_emoji = '✅' if is_online else '❌'
             response_info = f" ({response_time}ms)" if is_online else ""
-            print(f"  {i:2d}. {status_emoji} {name} ({ip}){response_info}")
+            print(f"  {i:2d}. {status_emoji} {name} ({ip}){response_info} - {status_detail}")
         
         # Estatísticas rápidas
         online_count = sum(1 for s in status.values() if s['status'] == 'online')
@@ -262,6 +304,14 @@ def index():
             gap: 15px;
             font-size: 0.85em;
             color: #95a5a6;
+            flex-wrap: wrap;
+        }
+        
+        .status-detail {
+            font-weight: 500;
+            color: #34495e;
+            font-size: 0.9em;
+            margin-top: 4px;
         }
         
         .status-badge { 
@@ -337,7 +387,7 @@ def index():
     <div class="container">
         <header>
             <h1>🔗 Monitor de Conectividade</h1>
-            <p class="subtitle">Monitoramento em tempo real de conectividade HTTP/HTTPS</p>
+            <p class="subtitle">Monitoramento rigoroso de conectividade HTTP/HTTPS</p>
             <p class="last-update">Última atualização: <span id="last-update">Carregando...</span></p>
         </header>
         
@@ -365,7 +415,7 @@ def index():
         
         <footer>
             <p>🚀 <strong>DevOpsDays</strong> | Atualização automática a cada 5 segundos</p>
-            <p>Conectividade verificada via HTTP, HTTPS e TCP</p>
+            <p>Conectividade verificada via HTTP, HTTPS e TCP | Versão 2.0 - Detecção Aprimorada</p>
         </footer>
     </div>
     
@@ -412,6 +462,9 @@ def index():
                         const responseTimeInfo = target.response_time ? 
                             `<span>⚡ ${target.response_time}ms</span>` : '';
                         
+                        const statusDetailInfo = target.status_detail ? 
+                            `<div class="status-detail">📋 ${target.status_detail}</div>` : '';
+                        
                         div.innerHTML = `
                             <div class="target-info">
                                 <h3>${target.name}</h3>
@@ -420,6 +473,7 @@ def index():
                                     <span>🕒 ${target.last_check}</span>
                                     ${responseTimeInfo}
                                 </div>
+                                ${statusDetailInfo}
                             </div>
                             <div class="status-badge ${target.status}">
                                 ${target.status === 'online' ? '🟢 ONLINE' : '🔴 OFFLINE'}
@@ -494,14 +548,15 @@ def health():
         "targets_online": online_count,
         "targets_offline": len(status) - online_count,
         "uptime": time.time() - start_time,
-        "version": "1.0.0"
+        "version": "2.0.0"
     })
 
 
 if __name__ == '__main__':
-    print("🚀 Iniciando Monitor de Conectividade...")
-    print(f"📝 Versão: 1.0.0")
+    print("🚀 Iniciando Monitor de Conectividade - Versão Aprimorada...")
+    print(f"📝 Versão: 2.0.0")
     print(f"🎯 Targets configurados: {len(targets)}")
+    print("🔧 Melhorias: Detecção mais rigorosa, timeouts otimizados, logging detalhado")
     
     # Marca tempo de início
     start_time = time.time()
