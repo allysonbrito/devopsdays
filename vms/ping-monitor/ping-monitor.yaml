@@ -1,0 +1,124 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ping-monitor
+  namespace: gitops
+  labels:
+    app: ping-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ping-monitor
+  template:
+    metadata:
+      labels:
+        app: ping-monitor
+    spec:
+      initContainers:
+      - name: git-clone
+        image: alpine/git:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "🔄 Clonando repositório..."
+          git clone https://github.com/allysonbrito/devopsdays.git /tmp/repo
+          echo "📁 Copiando arquivos da aplicação..."
+          cp -r /tmp/repo/ping-monitor/* /app/
+          ls -la /app/
+          echo "✅ Arquivos copiados com sucesso"
+        volumeMounts:
+        - name: app-files
+          mountPath: /app
+      containers:
+      - name: ping-monitor
+        image: python:3.11-slim
+        env:
+        - name: PYTHONPATH
+          value: "/home/python/.local/lib/python3.11/site-packages"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        ports:
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: app-files
+          mountPath: /app
+        command: ["/bin/bash"]
+        args:
+        - -c
+        - |
+          echo "🚀 Iniciando configuração do container..."
+          export HOME=/tmp
+          mkdir -p $HOME/.local
+          
+          echo "📦 Instalando dependências do sistema..."
+          apt-get update && apt-get install -y curl
+          
+          echo "🐍 Instalando dependências Python..."
+          pip install --user --no-warn-script-location flask requests urllib3
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          echo "📂 Verificando arquivos da aplicação..."
+          ls -la /app/
+          
+          echo "🎯 Iniciando aplicação..."
+          cd /app && python app.py
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: app-files
+        emptyDir: {}
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ping-monitor-service
+  namespace: gitops
+  labels:
+    app: ping-monitor
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: ping-monitor
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ping-monitor-git-config
+  namespace: gitops
+  labels:
+    app: ping-monitor
+data:
+  repository: "https://github.com/allysonbrito/devopsdays.git"
+  path: "ping-monitor"
+  branch: "main"

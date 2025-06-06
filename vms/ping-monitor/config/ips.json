@@ -1,0 +1,36 @@
+{
+  "targets": [
+    {
+      "ip": "google.com",
+      "name": "Google"
+    },
+    {
+      "ip": "github.com", 
+      "name": "GitHub"
+    },
+    {
+      "ip": "stackoverflow.com",
+      "name": "Stack Overflow"
+    },
+    {
+      "ip": "kubernetes.io",
+      "name": "Kubernetes"
+    },
+    {
+      "ip": "devopsdays.org",
+      "name": "DevOpsDays"
+    },
+    {
+      "ip": "cloudflare.com",
+      "name": "Cloudflare"
+    },
+    {
+      "ip": "httpbin.org",
+      "name": "HTTPBin API"
+    },
+    {
+      "ip": "jsonplaceholder.typicode.com",
+      "name": "JSONPlaceholder"
+    }
+  ]
+}
