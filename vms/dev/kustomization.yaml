@@ -1,3 +1,5 @@
 resources:
+  - dev5.yaml
+  - dev4.yaml
   - dev2.yaml
   - dev3.yaml
