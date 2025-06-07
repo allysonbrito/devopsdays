@@ -41,11 +41,8 @@ spec:
               #cloud-config
               hostname: dev1
               ssh_pwauth: True
-              users:
-                - name: techlead
-                  passwd: $6$XPkDQ4RzL0mv1BdM$hv4AWWrjPQ64DgxVGnkoct9K7P3BdaTVroXz7GcHRsIFEmypzQth6OATeOlR2MULHn80OJmd7ZTyb/HzXnJ3z/
               chpasswd:
-                root:Adm123!
+                root:YuDt7ick8$j3#T?X
               packages:
                 - httpd
                 - firewalld
