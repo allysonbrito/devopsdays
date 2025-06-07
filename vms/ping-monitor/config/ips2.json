@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "ip": "dev1-http-service-gitops.apps.ocp.techlead.local",
+      "ip": "dev1-http-gitops.apps.ocp.techlead.local",
       "name": "dev1 - apache"
     },
     {
