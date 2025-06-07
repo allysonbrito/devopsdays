@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: reboot-vm-rolebinding
+  namespace: gitops
+subjects:
+  - kind: ServiceAccount
+    name: argocd-reboot-vm-sa
+    namespace: gitops
+roleRef:
+  kind: Role
+  name: reboot-vm-role
+  apiGroup: rbac.authorization.k8s.io
+

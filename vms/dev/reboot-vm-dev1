@@ -22,7 +22,7 @@ spec:
               echo "Parando VM dev1..."
               oc patch vm dev1 -n gitops --type=merge -p '{"spec": {"running": false}}'
               echo "Aguardando parada completa..."
-              sleep 30
+              sleep 20
               echo "Iniciando VM dev1..."
               oc patch vm dev1 -n gitops --type=merge -p '{"spec": {"running": true}}'
               echo "Reboot concluído."
