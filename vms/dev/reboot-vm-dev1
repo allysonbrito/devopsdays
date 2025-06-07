@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: reboot-vm-dev1
+  namespace: gitops
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      serviceAccountName: argocd-reboot-vm-sa
+      restartPolicy: Never
+      containers:
+        - name: reboot-vm
+          image: quay.io/openshift/origin-cli:4.14
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Parando VM dev1..."
+              oc patch vm dev1 -n gitops --type=merge -p '{"spec": {"running": false}}'
+              echo "Aguardando parada completa..."
+              sleep 30
+              echo "Iniciando VM dev1..."
+              oc patch vm dev1 -n gitops --type=merge -p '{"spec": {"running": true}}'
+              echo "Reboot concluído."
+
