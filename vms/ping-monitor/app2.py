@@ -23,7 +23,7 @@ app = Flask(__name__)
 
 # Carrega lista de targets do arquivo de configuração
 try:
-    with open('/app/config/ips.json', 'r') as f:
+    with open('/app/config/ips2.json', 'r') as f:
         config = json.load(f)
     targets = config['targets']
     print(f"Carregados {len(targets)} targets para monitoramento")
