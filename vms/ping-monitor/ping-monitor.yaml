@@ -65,7 +65,7 @@ spec:
           ls -la /app/
           
           echo "🎯 Iniciando aplicação..."
-          cd /app && python app.py
+          cd /app && python app2.py
         resources:
           requests:
             memory: "128Mi"
