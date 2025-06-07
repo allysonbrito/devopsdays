@@ -71,3 +71,32 @@ spec:
                     </VirtualHost>
                   permissions: '0644'
 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev1-http
+  namespace: gitops
+spec:
+  selector:
+    kubevirt.io/domain: dev1
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: dev1-http
+  namespace: gitops
+spec:
+  to:
+    kind: Service
+    name: dev1-http
+  port:
+    targetPort: http
+
