@@ -26,7 +26,7 @@ spec:
               bridge: {}
         resources:
           requests:
-            memory: 4Gi
+            memory: 6Gi
       networks:
         - name: vlan19-net
           multus:
